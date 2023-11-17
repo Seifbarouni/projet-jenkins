@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Git repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+            }
+        }
+
+        stage('Build Docker image') {
+            steps {
+                sh 'docker build -t seifbarouni/projet-jenkins .'
+            }
+        }
+    }
+}
