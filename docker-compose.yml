@@ -1,0 +1,18 @@
+version: "3"
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+  nexus:
+    image: sonatype/nexus3:3.34.1
+    ports:
+      - 8081:8081
+
+  sonarqube:
+    image: sonarqube:8.9.2-community
+    ports:
+      - 9000:9000
