@@ -1,12 +1,15 @@
 version: "3"
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    image: custom-jenkins:lts
     ports:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
+      - /home/seif/Documents/fac-devops/jenkins_home:/var/jenkins_home
+    group_add:
+      - "docker"
+
   nexus:
     image: sonatype/nexus3:3.34.1
     ports:

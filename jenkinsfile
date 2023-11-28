@@ -2,15 +2,23 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Git repository') {
+        stage('CI') {
+            environment {
+                SCANNER_HOME = tool 'sonar'
+                PROJECT_NAME = "jenkins"
+            }
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
-            }
-        }
+                // test code with sonarqube
+                withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar2')  {
+                 sh '''$SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectKey=$PROJECT_NAME \
+                    -Dsonar.sources=.'''
+              }
+            
 
-        stage('Build Docker image') {
-            steps {
-                sh 'docker build -t seifbarouni/projet-jenkins .'
+                // build docker image
+                //sh 'docker build -t seifbarouni/projet-jenkins .'
             }
         }
     }
