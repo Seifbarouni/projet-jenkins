@@ -11,17 +11,64 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
                 // test code with sonarqube
                 withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar2')  {
-                 sh '''$SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=$PROJECT_NAME \
-                    -Dsonar.sources=.'''
-              }
-                timeout(time: 1, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true, credentialsId: 'sonar2'
-              }
-            
+                    sh '''$SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=$PROJECT_NAME \
+                        -Dsonar.sources=.'''
+                }
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        }
+                    }
+                }
 
-                // build docker image
-                //sh 'docker build -t seifbarouni/projet-jenkins .'
+                dir('front') {
+                    sh 'tar -czvf ../front.zip .'
+                    nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'nexus:8081',
+                    version: '1.0.0',
+                    repository: 'test2',
+                    credentialsId: 'nexus',
+                    artifacts: [
+                        [artifactId: 'front',
+                        classifier: '',
+                        file: '../front.zip',
+                        type: 'zip']
+                    ]
+                    )
+                }
+                dir('back') {
+                    sh 'tar -czvf ../back.zip .'
+                    nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'nexus:8081',
+                    version: '1.0.0',
+                    repository: 'test2',
+                    credentialsId: 'nexus',
+                    artifacts: [
+                        [artifactId: 'back',
+                        classifier: '',
+                        file: '../back.zip',
+                        type: 'zip']
+                    ]
+                    )
+                }
+               
+            }
+        }
+        stage('CD') {
+            steps{
+                dir('back') {
+                    sh 'docker build -t back:latest .'
+                }
+                dir('front') {
+                    sh 'docker build -t front:latest .'
+                }
             }
         }
     }
