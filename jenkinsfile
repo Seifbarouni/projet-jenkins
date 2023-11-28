@@ -15,6 +15,9 @@ pipeline {
                     -Dsonar.projectKey=$PROJECT_NAME \
                     -Dsonar.sources=.'''
               }
+                timeout(time: 1, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true, credentialsId: 'sonar2'
+              }
             
 
                 // build docker image
