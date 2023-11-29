@@ -42,7 +42,6 @@ pipeline {
         }
         stage('CD') {
             steps{
-                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
                 dir('dep') {
                     sh 'docker-compose -f docker-compose-webapp.yml up -d'
                 }
