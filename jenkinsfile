@@ -6,6 +6,7 @@ pipeline {
             environment {
                 SCANNER_HOME = tool 'sonar'
                 PROJECT_NAME = "jenkins"
+                DOCKER_PASSWORD = credentials('nexus-docker-credentials')
             }
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
@@ -23,51 +24,27 @@ pipeline {
                         }
                     }
                 }
-
                 dir('front') {
-                    sh 'tar -czvf ../front.zip .'
-                    nexusArtifactUploader(
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    nexusUrl: 'nexus:8081',
-                    version: '1.0.0',
-                    repository: 'test2',
-                    credentialsId: 'nexus',
-                    artifacts: [
-                        [artifactId: 'front',
-                        classifier: '',
-                        file: '../front.zip',
-                        type: 'zip']
-                    ]
-                    )
+                    // build docker image and tag it for nexus
+                    sh 'docker build -t localhost:8082/docker-nexus/front:latest .'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seif --password-stdin localhost:8082'
+                    sh 'docker push localhost:8082/docker-nexus/front:latest'
                 }
                 dir('back') {
-                    sh 'tar -czvf ../back.zip .'
-                    nexusArtifactUploader(
-                    nexusVersion: 'nexus3',
-                    protocol: 'http',
-                    nexusUrl: 'nexus:8081',
-                    version: '1.0.0',
-                    repository: 'test2',
-                    credentialsId: 'nexus',
-                    artifacts: [
-                        [artifactId: 'back',
-                        classifier: '',
-                        file: '../back.zip',
-                        type: 'zip']
-                    ]
-                    )
+                    // build docker image and tag it for nexus
+                    sh 'docker build -t localhost:8082/docker-nexus/back:latest .'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seif --password-stdin localhost:8082'
+                    sh 'docker push localhost:8082/docker-nexus/back:latest'
                 }
+               
                
             }
         }
         stage('CD') {
             steps{
-                dir('back') {
-                    sh 'docker build -t back:latest .'
-                }
-                dir('front') {
-                    sh 'docker build -t front:latest .'
+                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+                dir('dep') {
+                    sh 'docker-compose -f docker-compose-webapp.yml up -d'
                 }
             }
         }

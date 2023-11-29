@@ -11,9 +11,12 @@ services:
       - "docker"
 
   nexus:
-    image: sonatype/nexus3:3.34.1
+    image: sonatype/nexus3:3.62.0
     ports:
       - 8081:8081
+      - 8082:8082
+    volumes:
+      - /home/seif/Documents/fac-devops/nexus-data:/nexus-data
 
   sonarqube:
     image: sonarqube:10.3-community
