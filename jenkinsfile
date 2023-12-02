@@ -42,9 +42,17 @@ pipeline {
         }
         stage('CD') {
             steps{
+                // dir('dep') {
+                //     sh 'docker-compose -f docker-compose-webapp.yml up -d'
+                // }
+                // deploy to minikube cluster
                 dir('dep') {
-                    sh 'docker-compose -f docker-compose-webapp.yml up -d'
+                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                        sh 'kubectl apply -f k8s.yaml'
+                        //sh 'kubectl create ns seif'
+                    }
                 }
+
             }
         }
     }
