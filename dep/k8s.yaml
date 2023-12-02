@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: localhost:8082/docker-nexus/front:latest
+          image: 172.22.0.4:8082/docker-nexus/front:latest
           ports:
             - containerPort: 3000
       imagePullSecrets:
@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: localhost:8082/docker-nexus/back:latest
+          image: 172.22.0.4:8082/docker-nexus/back:latest
           ports:
             - containerPort: 9999
       imagePullSecrets:

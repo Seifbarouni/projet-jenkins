@@ -17,7 +17,7 @@ nodes:
         protocol: TCP
 containerdConfigPatches:
   - |-
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."	172.20.0.4:8082"]
-      endpoint = ["http://	172.20.0.4:8082"]
-    [plugins."io.containerd.grpc.v1.cri".registry.configs."	172.20.0.4:8082".tls]
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."	172.22.0.4:8082"]
+      endpoint = ["http://172.22.0.4:8082"]
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."	172.22.0.4:8082".tls]
       insecure_skip_verify = true
