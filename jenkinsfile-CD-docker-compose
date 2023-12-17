@@ -33,5 +33,11 @@ pipeline {
                 }
             }
         }
+
+        stage('Send-Slack-Message') {
+            steps {
+                slackSend(color: '#FFFF00', message: 'Build Docker + Docker Compose --> Success')
+            }
+        }
     }
 }

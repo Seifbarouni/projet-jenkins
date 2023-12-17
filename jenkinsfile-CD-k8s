@@ -31,5 +31,10 @@ pipeline {
                 }
             }
         }
+        stage('Send-Slack-Message') {
+            steps {
+                slackSend(color: '#FFFF00', message: 'Build Docker + K8S --> Success')
+            }
+        }
     }
 }
