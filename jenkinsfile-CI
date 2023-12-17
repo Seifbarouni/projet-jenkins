@@ -6,6 +6,7 @@ pipeline {
             environment {
                 SCANNER_HOME = tool 'sonar'
                 PROJECT_NAME = 'jenkins'
+                // create credentials of nexus in jenkins (username + password)
                 NEXUS_PASSWORD = credentials('nexus-docker-credentials')
             }
             steps {
@@ -24,6 +25,40 @@ pipeline {
                             error "Pipeline aborted due to quality gate failure: ${qg.status}"
                         }
                     }
+                }
+                dir('front') {
+                    sh 'tar -czvf ../front.zip .'
+                    nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'nexus:8081',
+                    version: '1.0.0',
+                    repository: 'nexus',
+                    credentialsId: 'nexus-docker-credentials',
+                    artifacts: [
+                        [artifactId: 'front',
+                        classifier: '',
+                        file: '../front.zip',
+                        type: 'zip']
+                    ]
+                    )
+                }
+                dir('back') {
+                    sh 'tar -czvf ../back.zip .'
+                    nexusArtifactUploader(
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    nexusUrl: 'nexus:8081',
+                    version: '1.0.0',
+                    repository: 'nexus',
+                    credentialsId: 'nexus-docker-credentials',
+                    artifacts: [
+                        [artifactId: 'back',
+                        classifier: '',
+                        file: '../back.zip',
+                        type: 'zip']
+                    ]
+                    )
                 }
             }
         }

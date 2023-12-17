@@ -15,9 +15,3 @@ nodes:
       - containerPort: 443
         hostPort: 443
         protocol: TCP
-containerdConfigPatches:
-  - |-
-    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."	172.22.0.4:8082"]
-      endpoint = ["http://172.22.0.4:8082"]
-    [plugins."io.containerd.grpc.v1.cri".registry.configs."	172.22.0.4:8082".tls]
-      insecure_skip_verify = true

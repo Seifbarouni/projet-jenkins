@@ -2,14 +2,33 @@ pipeline {
     agent any
 
     stages {
+        stage('CD-build-push-docker') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+                // IMPORTANT: create a docker repo in nexus named docker-nexus
+                dir('front') {
+                    // build docker image and tag it for dockerub seifbarouni/jenkins
+                    sh 'docker build -t seifbarouni/front:latest .'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                    sh 'docker push seifbarouni/front:latest'
+                }
+                dir('back') {
+                    // build docker image and tag it for dockerub seifbarouni/jenkins
+                    sh 'docker build -t seifbarouni/back:latest .'
+                    /* groovylint-disable-next-line DuplicateStringLiteral */
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                    sh 'docker push seifbarouni/back:latest'
+                }
+            }
+        }
         stage('CD-k8s') {
             steps {
                 // deploy to k8s cluster
-                // dir($DEPLOYMENT_FOLDER) {
-                //     withKubeConfig([credentialsId: 'kubeconfig']) {
-                //         sh 'kubectl apply -f k8s.yaml'
-                //     }
-                // }
+                dir('dep') {
+                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                        sh 'kubectl apply -f k8s.yaml'
+                    }
+                }
             }
         }
     }
