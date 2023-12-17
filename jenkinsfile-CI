@@ -6,7 +6,7 @@ pipeline {
             environment {
                 SCANNER_HOME = tool 'sonar'
                 PROJECT_NAME = 'jenkins'
-                DOCKER_PASSWORD = credentials('nexus-docker-credentials')
+                NEXUS_PASSWORD = credentials('nexus-docker-credentials')
             }
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'

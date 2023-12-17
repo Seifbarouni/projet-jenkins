@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: seifbarouni/jenkins/front:latest
+          image: seifbarouni/front:latest
           ports:
             - containerPort: 3000
       imagePullSecrets:
@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: seifbarouni/jenkins/back:latest
+          image: seifbarouni/back:latest
           ports:
             - containerPort: 9999
       imagePullSecrets:

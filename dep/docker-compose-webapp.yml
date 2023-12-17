@@ -1,11 +1,11 @@
 version: "3"
 services:
   front:
-    image: seifbarouni/jenkins/front:latest
+    image: seifbarouni/front:latest
     ports:
       - 3000:3000
   back:
-    image: seifbarouni/jenkins/back:latest
+    image: seifbarouni/back:latest
     ports:
       - 9999:9999
   mongo:

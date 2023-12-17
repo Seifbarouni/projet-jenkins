@@ -13,16 +13,16 @@ pipeline {
                 // IMPORTANT: create a docker repo in nexus named docker-nexus
                 dir('front') {
                     // build docker image and tag it for dockerub seifbarouni/jenkins
-                    sh 'docker build -t seifbarouni/jenkins/front:latest .'
+                    sh 'docker build -t seifbarouni/front:latest .'
                     sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/jenkins/front:latest'
+                    sh 'docker push seifbarouni/front:latest'
                 }
                 dir('back') {
                     // build docker image and tag it for dockerub seifbarouni/jenkins
-                    sh 'docker build -t seifbarouni/jenkins/back:latest .'
+                    sh 'docker build -t seifbarouni/back:latest .'
                     /* groovylint-disable-next-line DuplicateStringLiteral */
                     sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/jenkins/back:latest'
+                    sh 'docker push seifbarouni/back:latest'
                 }
             }
         }
