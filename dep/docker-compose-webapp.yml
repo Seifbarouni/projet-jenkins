@@ -1,11 +1,11 @@
 version: "3"
 services:
   front:
-    image: localhost:8082/docker-nexus/front:latest
+    image: seifbarouni/jenkins/front:latest
     ports:
       - 3000:3000
   back:
-    image: localhost:8082/docker-nexus/back:latest
+    image: seifbarouni/jenkins/back:latest
     ports:
       - 9999:9999
   mongo:

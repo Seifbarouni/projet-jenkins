@@ -25,20 +25,6 @@ pipeline {
                         }
                     }
                 }
-                // IMPORTANT: create a docker repo in nexus named docker-nexus
-                dir('front') {
-                    // build docker image and tag it for nexus
-                    sh 'docker build -t localhost:8082/docker-nexus/front:latest .'
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seif --password-stdin localhost:8082'
-                    sh 'docker push localhost:8082/docker-nexus/front:latest'
-                }
-                dir('back') {
-                    // build docker image and tag it for nexus
-                    sh 'docker build -t localhost:8082/docker-nexus/back:latest .'
-                    /* groovylint-disable-next-line DuplicateStringLiteral */
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seif --password-stdin localhost:8082'
-                    sh 'docker push localhost:8082/docker-nexus/back:latest'
-                }
             }
         }
     }

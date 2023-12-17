@@ -1,0 +1,37 @@
+/* groovylint-disable-next-line CompileStatic */
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_PASSWORD = credentials('docker-credentials')
+    }
+
+    stages {
+        stage('CD-build-push-docker') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+                // IMPORTANT: create a docker repo in nexus named docker-nexus
+                dir('front') {
+                    // build docker image and tag it for dockerub seifbarouni/jenkins
+                    sh 'docker build -t seifbarouni/jenkins/front:latest .'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                    sh 'docker push seifbarouni/jenkins/front:latest'
+                }
+                dir('back') {
+                    // build docker image and tag it for dockerub seifbarouni/jenkins
+                    sh 'docker build -t seifbarouni/jenkins/back:latest .'
+                    /* groovylint-disable-next-line DuplicateStringLiteral */
+                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                    sh 'docker push seifbarouni/jenkins/back:latest'
+                }
+            }
+        }
+        stage('CD-docker-compose') {
+            steps {
+                dir('dep') {
+                    sh 'docker-compose -f docker-compose-webapp.yml up -d'
+                }
+            }
+        }
+    }
+}

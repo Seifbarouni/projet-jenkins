@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('CD-k8s') {
+            steps {
+                // deploy to k8s cluster
+                // dir($DEPLOYMENT_FOLDER) {
+                //     withKubeConfig([credentialsId: 'kubeconfig']) {
+                //         sh 'kubectl apply -f k8s.yaml'
+                //     }
+                // }
+            }
+        }
+    }
+}
