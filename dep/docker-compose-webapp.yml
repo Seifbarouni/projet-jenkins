@@ -8,3 +8,7 @@ services:
     image: localhost:8082/docker-nexus/back:latest
     ports:
       - 9999:9999
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017

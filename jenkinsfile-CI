@@ -5,17 +5,18 @@ pipeline {
         stage('CI') {
             environment {
                 SCANNER_HOME = tool 'sonar'
-                PROJECT_NAME = "jenkins"
+                PROJECT_NAME = 'jenkins'
                 DOCKER_PASSWORD = credentials('nexus-docker-credentials')
             }
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
                 // test code with sonarqube
-                withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar2')  {
+                withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar')  {
                     sh '''$SCANNER_HOME/bin/sonar-scanner \
                         -Dsonar.projectKey=$PROJECT_NAME \
                         -Dsonar.sources=.'''
                 }
+                // IMPORTANT: remember to add a webhook to sonarqube: http://jenkins:8080/sonarqube-webhook/
                 script {
                     timeout(time: 1, unit: 'HOURS') {
                         def qg = waitForQualityGate()
@@ -24,6 +25,7 @@ pipeline {
                         }
                     }
                 }
+                // IMPORTANT: create a docker repo in nexus named docker-nexus
                 dir('front') {
                     // build docker image and tag it for nexus
                     sh 'docker build -t localhost:8082/docker-nexus/front:latest .'
@@ -33,26 +35,10 @@ pipeline {
                 dir('back') {
                     // build docker image and tag it for nexus
                     sh 'docker build -t localhost:8082/docker-nexus/back:latest .'
+                    /* groovylint-disable-next-line DuplicateStringLiteral */
                     sh 'echo $DOCKER_PASSWORD | docker login -u seif --password-stdin localhost:8082'
                     sh 'docker push localhost:8082/docker-nexus/back:latest'
                 }
-               
-               
-            }
-        }
-        stage('CD') {
-            steps{
-                // dir('dep') {
-                //     sh 'docker-compose -f docker-compose-webapp.yml up -d'
-                // }
-                // deploy to minikube cluster
-                dir('dep') {
-                    withKubeConfig([credentialsId: 'kubeconfig']) {
-                        sh 'kubectl apply -f k8s.yaml'
-                        //sh 'kubectl create ns seif'
-                    }
-                }
-
             }
         }
     }

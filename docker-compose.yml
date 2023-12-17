@@ -2,21 +2,25 @@ version: "3"
 services:
   jenkins:
     image: custom-jenkins:lts
+    env_file:
+      - .env
     ports:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/seif/Documents/fac-devops/jenkins_home:/var/jenkins_home
+      - ${DATA_DIRECTORY}/jenkins:/var/jenkins_home
     group_add:
       - "docker"
 
   nexus:
     image: sonatype/nexus3:3.62.0
+    env_file:
+      - .env
     ports:
       - 8081:8081
       - 8082:8082
-    volumes:
-      - /home/seif/Documents/fac-devops/nexus-data:/nexus-data
+    # volumes:
+    #   - ${DATA_DIRECTORY}/nexus:/nexus-data
 
   sonarqube:
     image: sonarqube:10.3-community
