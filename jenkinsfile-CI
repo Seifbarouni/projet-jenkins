@@ -5,11 +5,12 @@ pipeline {
             PROJECT_NAME = 'jenkins'
             // create credentials of nexus in jenkins (username + password)
             NEXUS_PASSWORD = credentials('nexus-docker-credentials')
+            RELEASE = '1.0.0'
     }
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+                git branch: 'release/v$RELEASE', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
             }
         }
         stage('SoanrQube Analysis') {
