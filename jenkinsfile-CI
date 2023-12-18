@@ -34,7 +34,7 @@ pipeline {
         stage('Push to Nexus') {
                 steps {
                     dir('front') {
-                        sh 'tar -czvf ../front.zip .'
+                        sh 'tar -czvf ../front.tar.gz .'
                         nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
@@ -46,13 +46,13 @@ pipeline {
                     artifacts: [
                         [artifactId: 'front',
                         classifier: '',
-                        file: '../front.zip',
-                        type: 'zip']
+                        file: '../front.tar.gz',
+                        type: 'tar.gz']
                     ]
                     )
                     }
                     dir('back') {
-                        sh 'tar -czvf ../back.zip .'
+                        sh 'tar -czvf ../back.tar.gz .'
                         nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
@@ -64,8 +64,8 @@ pipeline {
                     artifacts: [
                         [artifactId: 'back',
                         classifier: '',
-                        file: '../back.zip',
-                        type: 'zip']
+                        file: '../back.tar.gz',
+                        type: 'tar.gz']
                     ]
                     )
                     }
