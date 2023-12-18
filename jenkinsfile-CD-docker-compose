@@ -17,19 +17,18 @@ pipeline {
                         curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/back/$RELEASE_VERSION/back-$RELEASE_VERSION.tar.gz"
                     '''
                     // unzip the artifacts
-                    sh 'mkdir front-$RELEASE_VERSION'
-                    sh 'mkdir back-$RELEASE_VERSION'
+                    sh 'mkdir -p front-$RELEASE_VERSION'
+                    sh 'mkdir -p back-$RELEASE_VERSION'
                     sh 'tar -xzvf front-$RELEASE_VERSION.tar.gz -C front-$RELEASE_VERSION'
                     sh 'tar -xzvf back-$RELEASE_VERSION.tar.gz -C back-$RELEASE_VERSION'
             }
         }
         stage('Build Docker Images') {
             steps {
-                git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
-                dir('front-$RELEASE_VERSION') {
+                dir("front-${RELEASE_VERSION}") {
                     sh 'docker build -t seifbarouni/frontend:$RELEASE_VERSION .'
                 }
-                dir('back-$RELEASE_VERSION') {
+                dir("back-${RELEASE_VERSION}") {
                     sh 'docker build -t seifbarouni/backend:$RELEASE_VERSION .'
                 }
             }
@@ -53,7 +52,7 @@ pipeline {
 
         stage('Send Slack Message') {
             steps {
-                slackSend(color: '#FFFF00', message: 'Build Docker + Docker Compose --> Success')
+                slackSend(color: '#FFFF00', message: "Build Docker + Docker Compose App Version ${RELEASE_VERSION} --> Success")
             }
         }
         stage('Clean Up') {
