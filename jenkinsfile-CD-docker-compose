@@ -7,6 +7,21 @@ pipeline {
     }
 
     stages {
+        // stage('Download Artifact from Nexus') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'seif', passwordVariable: 'seif')]) {
+        //             sh '''
+        //                 curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/front/1.0.0/front-1.0.0.zip"
+        //             '''
+        //             sh '''
+        //                 curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/back/1.0.0/back-1.0.0.zip"
+        //             '''
+        //             // unzip the artifacts
+        //             sh 'unzip front-1.0.0.zip'
+        //             sh 'unzip back-1.0.0.zip'
+        //         }
+        //     }
+        // }
         stage('Build Docker Images') {
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
