@@ -1,11 +1,11 @@
 version: "3"
 services:
   front:
-    image: seifbarouni/frontend:latest
+    image: seifbarouni/frontend:$RELEASE_VERSION
     ports:
       - 3000:3000
   back:
-    image: seifbarouni/backend:latest
+    image: seifbarouni/backend:$RELEASE_VERSION
     ports:
       - 9999:9999
   mongo:

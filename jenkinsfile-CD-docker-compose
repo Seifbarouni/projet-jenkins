@@ -4,32 +4,33 @@ pipeline {
 
     environment {
         DOCKER_PASSWORD = credentials('docker-credentials')
+        RELEASE_VERSION = '1.0.0'
     }
 
     stages {
         stage('Download Artifact from Nexus') {
             steps {
                     sh '''
-                        curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/front/1.0.0/front-1.0.0.tar.gz"
+                        curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/front/$RELEASE_VERSION/front-$RELEASE_VERSION.tar.gz"
                     '''
                     sh '''
-                        curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/back/1.0.0/back-1.0.0.tar.gz"
+                        curl -u $NEXUS_USERNAME:$NEXUS_PASSWORD -O "http://nexus:8081/repository/nexus/com/seifbarouni/back/$RELEASE_VERSION/back-$RELEASE_VERSION.tar.gz"
                     '''
                     // unzip the artifacts
-                    sh 'mkdir front-1.0.0'
-                    sh 'mkdir back-1.0.0'
-                    sh 'tar -xzvf front-1.0.0.tar.gz -C front-1.0.0'
-                    sh 'tar -xzvf back-1.0.0.tar.gz -C back-1.0.0'
+                    sh 'mkdir front-$RELEASE_VERSION'
+                    sh 'mkdir back-$RELEASE_VERSION'
+                    sh 'tar -xzvf front-$RELEASE_VERSION.tar.gz -C front-$RELEASE_VERSION'
+                    sh 'tar -xzvf back-$RELEASE_VERSION.tar.gz -C back-$RELEASE_VERSION'
             }
         }
         stage('Build Docker Images') {
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
-                dir('front-1.0.0') {
-                    sh 'docker build -t seifbarouni/frontend:latest .'
+                dir('front-$RELEASE_VERSION') {
+                    sh 'docker build -t seifbarouni/frontend:$RELEASE_VERSION .'
                 }
-                dir('back-1.0.0') {
-                    sh 'docker build -t seifbarouni/backend:latest .'
+                dir('back-$RELEASE_VERSION') {
+                    sh 'docker build -t seifbarouni/backend:$RELEASE_VERSION .'
                 }
             }
         }
@@ -37,15 +38,15 @@ pipeline {
         stage('Push Docker Images') {
             steps {
                 sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                sh 'docker push seifbarouni/frontend:latest'
-                sh 'docker push seifbarouni/backend:latest'
+                sh 'docker push seifbarouni/frontend:$RELEASE_VERSION'
+                sh 'docker push seifbarouni/backend:$RELEASE_VERSION'
             }
         }
 
         stage('Run Docker Compose') {
             steps {
                 dir('dep') {
-                    sh 'docker-compose -f docker-compose-webapp.yml up -d'
+                    sh 'docker-compose -f docker-compose-webapp.yml up -e RELEASE_VERSION=$RELEASE_VERSION -d'
                 }
             }
         }
@@ -57,10 +58,10 @@ pipeline {
         }
         stage('Clean Up') {
             steps {
-                sh 'rm -rf front-1.0.0'
-                sh 'rm -rf back-1.0.0'
-                sh 'rm -rf front-1.0.0.tar.gz'
-                sh 'rm -rf back-1.0.0.tar.gz'
+                sh 'rm -rf front-$RELEASE_VERSION'
+                sh 'rm -rf back-$RELEASE_VERSION'
+                sh 'rm -rf front-$RELEASE_VERSION.tar.gz'
+                sh 'rm -rf back-$RELEASE_VERSION.tar.gz'
             }
         }
     }
