@@ -1,16 +1,19 @@
 pipeline {
     agent any
-
+    environment {
+            SCANNER_HOME = tool 'sonar'
+            PROJECT_NAME = 'jenkins'
+            // create credentials of nexus in jenkins (username + password)
+            NEXUS_PASSWORD = credentials('nexus-docker-credentials')
+    }
     stages {
-        stage('CI') {
-            environment {
-                SCANNER_HOME = tool 'sonar'
-                PROJECT_NAME = 'jenkins'
-                // create credentials of nexus in jenkins (username + password)
-                NEXUS_PASSWORD = credentials('nexus-docker-credentials')
-            }
+        stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
+            }
+        }
+        stage('SoanrQube Analysis') {
+            steps {
                 // test code with sonarqube
                 withSonarQubeEnv(installationName: 'sonar', credentialsId: 'sonar')  {
                     sh '''$SCANNER_HOME/bin/sonar-scanner \
@@ -26,14 +29,19 @@ pipeline {
                         }
                     }
                 }
-                dir('front') {
-                    sh 'tar -czvf ../front.zip .'
-                    nexusArtifactUploader(
+            }
+        }
+        stage('Push to Nexus') {
+                steps {
+                    dir('front') {
+                        sh 'tar -czvf ../front.zip .'
+                        nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: 'nexus:8081',
                     version: '1.0.0',
                     repository: 'nexus',
+                    groupId: 'com.seifbarouni',
                     credentialsId: 'nexus-docker-credentials',
                     artifacts: [
                         [artifactId: 'front',
@@ -42,15 +50,16 @@ pipeline {
                         type: 'zip']
                     ]
                     )
-                }
-                dir('back') {
-                    sh 'tar -czvf ../back.zip .'
-                    nexusArtifactUploader(
+                    }
+                    dir('back') {
+                        sh 'tar -czvf ../back.zip .'
+                        nexusArtifactUploader(
                     nexusVersion: 'nexus3',
                     protocol: 'http',
                     nexusUrl: 'nexus:8081',
                     version: '1.0.0',
                     repository: 'nexus',
+                    groupId: 'com.seifbarouni',
                     credentialsId: 'nexus-docker-credentials',
                     artifacts: [
                         [artifactId: 'back',
@@ -59,8 +68,8 @@ pipeline {
                         type: 'zip']
                     ]
                     )
+                    }
                 }
             }
         }
     }
-}

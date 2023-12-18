@@ -7,26 +7,27 @@ pipeline {
     }
 
     stages {
-        stage('CD-build-push-docker') {
+        stage('Build Docker Images') {
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
-                // IMPORTANT: create a docker repo in nexus named docker-nexus
                 dir('front') {
-                    // build docker image and tag it for dockerub seifbarouni/jenkins
                     sh 'docker build -t seifbarouni/frontend:latest .'
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/frontend:latest'
                 }
                 dir('back') {
-                    // build docker image and tag it for dockerub seifbarouni/jenkins
                     sh 'docker build -t seifbarouni/backend:latest .'
-                    /* groovylint-disable-next-line DuplicateStringLiteral */
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/backend:latest'
                 }
             }
         }
-        stage('CD-docker-compose') {
+
+        stage('Push Docker Images') {
+            steps {
+                sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                sh 'docker push seifbarouni/frontend:latest'
+                sh 'docker push seifbarouni/backend:latest'
+            }
+        }
+
+        stage('Run Docker Compose') {
             steps {
                 dir('dep') {
                     sh 'docker-compose -f docker-compose-webapp.yml up -d'
@@ -34,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Send-Slack-Message') {
+        stage('Send Slack Message') {
             steps {
                 slackSend(color: '#FFFF00', message: 'Build Docker + Docker Compose --> Success')
             }

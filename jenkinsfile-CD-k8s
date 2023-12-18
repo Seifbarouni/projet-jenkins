@@ -1,27 +1,33 @@
+/* groovylint-disable-next-line CompileStatic */
 pipeline {
     agent any
 
+    environment {
+        DOCKER_PASSWORD = credentials('docker-credentials')
+    }
+
     stages {
-        stage('CD-build-push-docker') {
+        stage('Build Docker Images') {
             steps {
                 git branch: 'main', url: 'https://github.com/Seifbarouni/projet-jenkins.git'
-                // IMPORTANT: create a docker repo in nexus named docker-nexus
                 dir('front') {
-                    // build docker image and tag it for dockerub seifbarouni/jenkins
                     sh 'docker build -t seifbarouni/frontend:latest .'
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/frontend:latest'
                 }
                 dir('back') {
-                    // build docker image and tag it for dockerub seifbarouni/jenkins
                     sh 'docker build -t seifbarouni/backend:latest .'
-                    /* groovylint-disable-next-line DuplicateStringLiteral */
-                    sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
-                    sh 'docker push seifbarouni/backend:latest'
                 }
             }
         }
-        stage('CD-k8s') {
+        stage('Push Docker Images') {
+            steps {
+                sh 'echo $DOCKER_PASSWORD | docker login -u seifbarouni --password-stdin'
+                sh 'docker push seifbarouni/frontend:latest'
+                sh 'docker push seifbarouni/backend:latest'
+            }
+        }
+        // IMPORTANT: create kind cluster and add the kubeconfig to jenkins credentials, the jenkins container must be in the same network as the kind cluster
+
+        stage('Deploy to Kubernetes') {
             steps {
                 // deploy to k8s cluster
                 dir('dep') {
@@ -31,9 +37,9 @@ pipeline {
                 }
             }
         }
-        stage('Send-Slack-Message') {
+        stage('Send Slack Message') {
             steps {
-                slackSend(color: '#FFFF00', message: 'Build Docker + K8S --> Success')
+                slackSend(color: '#FFFF00', message: 'Build Docker + K8S Deployment --> Success')
             }
         }
     }
